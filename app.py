@@ -13,6 +13,9 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, LSTM, Dropout
 from tensorflow.keras.callbacks import EarlyStopping
 
+# Optional page config
+st.set_page_config(page_title="Stock Prediction Center", layout="wide")
+
 # ------------------------------
 # 🎨 Enhanced Professional Styling
 # ------------------------------
@@ -61,7 +64,7 @@ st.markdown(
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
     }
 
-    /* Professional header */
+    /* Professional header (kept but we will render a smaller inline header instead of this large block) */
     .main-header {
         background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
         border: 1px solid rgba(255, 255, 255, 0.2) !important;
@@ -87,7 +90,7 @@ st.markdown(
         }
     }
     
-    /* Custom header with animated gradient */
+    /* Custom header with animated gradient - kept for potential use but we will render a smaller title below */
     .main-header {
         background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
         background-size: 200% 200%;
@@ -207,17 +210,28 @@ st.markdown(
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(0,176,155,0.4);
     }
+
+    /* make the inline header text smaller when we render it as gradient text */
+    .inline-gradient-title {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 6px;
+    }
     </style>
     """,
     unsafe_allow_html=True
 )
 
 # ------------------------------
-# 🚀 Enhanced Header with Status
+# 🚀 Enhanced Header with Status (modified: smaller header text)
 # ------------------------------
 col_header1, col_header2, col_header3 = st.columns([3, 1, 1])
 with col_header1:
-    st.markdown('<div class="main-header">📈 AI Stock Prediction Dashboard</div>', unsafe_allow_html=True)
+    # Smaller gradient text header instead of big boxed header
+    st.markdown('<div class="inline-gradient-title">📈 Stock Prediction Center</div>', unsafe_allow_html=True)
 
 with col_header2:
     st.metric("Status", "Ready", delta="Online")
@@ -226,31 +240,34 @@ with col_header3:
     st.metric("Last Update", datetime.now().strftime("%H:%M"))
 
 # ------------------------------
-# 🎯 Configuration Panel
+# 🎯 Configuration Panel (moved into collapsible expander)
 # ------------------------------
-st.markdown('<div class="section-header">⚙️ Model Configuration</div>', unsafe_allow_html=True)
+# Use an expander collapsed by default so user can click arrow to reveal settings
+with st.expander("⚙️ Model Configuration", expanded=False):
+    # optional section header inside expander to keep visual style
+    st.markdown('<div class="section-header">⚙️ Model Configuration</div>', unsafe_allow_html=True)
 
-config_col1, config_col2, config_col3, config_col4 = st.columns(4)
+    config_col1, config_col2, config_col3, config_col4 = st.columns(4)
 
-with config_col1:
-    st.markdown("**📊 Data Parameters**")
-    time_window = st.slider("Time Window (days)", 5, 100, 60, help="Number of days to look back for prediction")
-    test_ratio = st.slider("Test Ratio", 0.1, 0.5, 0.2, help="Proportion of data for testing")
+    with config_col1:
+        st.markdown("**📊 Data Parameters**")
+        time_window = st.slider("Time Window (days)", 5, 100, 60, help="Number of days to look back for prediction")
+        test_ratio = st.slider("Test Ratio", 0.1, 0.5, 0.2, help="Proportion of data for testing")
 
-with config_col2:
-    st.markdown("**🤖 Model Architecture**")
-    model_choice = st.selectbox("Model Type", ["LSTM", "MLP", "Hybrid"], help="Choose neural network architecture")
-    layers = st.slider("Hidden Layers", 1, 5, 3, help="Number of hidden layers")
+    with config_col2:
+        st.markdown("**🤖 Model Architecture**")
+        model_choice = st.selectbox("Model Type", ["LSTM", "MLP", "Hybrid"], help="Choose neural network architecture")
+        layers = st.slider("Hidden Layers", 1, 5, 3, help="Number of hidden layers")
 
-with config_col3:
-    st.markdown("**🔧 Training Parameters**")
-    epochs = st.slider("Training Epochs", 10, 500, 100, help="Number of training iterations")
-    batch_size = st.selectbox("Batch Size", [16, 32, 64, 128], index=1, help="Training batch size")
+    with config_col3:
+        st.markdown("**🔧 Training Parameters**")
+        epochs = st.slider("Training Epochs", 10, 500, 100, help="Number of training iterations")
+        batch_size = st.selectbox("Batch Size", [16, 32, 64, 128], index=1, help="Training batch size")
 
-with config_col4:
-    st.markdown("**📈 Prediction Settings**")
-    forecast_days = st.slider("Forecast Days", 1, 30, 7, help="Days to forecast into future")
-    confidence_level = st.slider("Confidence Level", 0.8, 0.99, 0.95, help="Prediction confidence interval")
+    with config_col4:
+        st.markdown("**📈 Prediction Settings**")
+        forecast_days = st.slider("Forecast Days", 1, 30, 7, help="Days to forecast into future")
+        confidence_level = st.slider("Confidence Level", 0.8, 0.99, 0.95, help="Prediction confidence interval")
 
 # ------------------------------
 # 🏢 TASI Stock Search & Data Management
@@ -965,7 +982,7 @@ footer_col1, footer_col2, footer_col3 = st.columns([2, 1, 1])
 with footer_col1:
     st.markdown(
         "<div style='text-align: center; color: #666; font-size: 0.9rem;'>"
-        "© 2024 AI Stock Prediction Dashboard | Built with Streamlit & TensorFlow"
+        "© 2024 Stock Prediction Center | Built with Streamlit & TensorFlow"
         "</div>", 
         unsafe_allow_html=True
     )
