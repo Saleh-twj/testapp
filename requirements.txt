@@ -3,8 +3,7 @@ pandas
 numpy
 matplotlib
 plotly
-yfinance
+seaborn
 scikit-learn
 tensorflow
-
-
+yfinance
