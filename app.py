@@ -6,8 +6,8 @@ import seaborn as sns
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error, r2_score
 import tensorflow as tf
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, LSTM, Dropout
+from tensorflow.keras.models import Sequential, Model
+from tensorflow.keras.layers import Dense, LSTM, Dropout, Input, Concatenate, Flatten
 from tensorflow.keras.optimizers import Adam
 import plotly.graph_objects as go
 import plotly.express as px
@@ -63,7 +63,7 @@ def get_translations(language):
             'change_col': "Change %: Change percentage",
             'features': "🎯 System Features",
             'features_list': [
-                "Deep Learning Models: LSTM and MLP as per project document",
+                "Deep Learning Models: LSTM, MLP, and Hybrid as per project document",
                 "Trading Focus: Customized for Saudi stock market",
                 "Performance Metrics: RMSE, MSE, and R² according to methodology",
                 "User-Friendly Interface: Easy-to-use Arabic design",
@@ -74,18 +74,23 @@ def get_translations(language):
             'model_specs_list': [
                 "LSTM: Two layers with Dropout to prevent overfitting",
                 "MLP: With ReLU activation",
+                "Hybrid: Combines LSTM temporal features with MLP pattern recognition",
                 "Data Normalization: Min-Max scaling according to methodology",
                 "Time Series: Sliding window approach for sequence prediction"
             ],
             'performance_stats': "📈 Model Performance Statistics",
             'lstm_accuracy': "LSTM Accuracy",
             'mlp_accuracy': "MLP Accuracy",
+            'hybrid_accuracy': "Hybrid Accuracy",
             'avg_r2': "Average R²",
             'historical_price': "Historical Price",
             'future_forecast': "Future Forecast",
             'training_data': "Training Data",
             'actual_price': "Actual Price",
-            'predicted_price': "Predicted Price"
+            'predicted_price': "Predicted Price",
+            'hybrid_description': "🤖 Hybrid Model: Combines LSTM's sequence learning with MLP's pattern recognition for enhanced accuracy",
+            'model_comparison': "📊 Model Comparison",
+            'best_model': "🏆 Best Performing Model"
         },
         'arabic': {
             'title': "📈 نظام التنبؤ بأسعار الأسهم - تداول السعودية",
@@ -132,7 +137,7 @@ def get_translations(language):
             'change_col': "Change %: نسبة التغير",
             'features': "🎯 ميزات النظام",
             'features_list': [
-                "نماذج التعلم العميق: LSTM و MLP كما في وثيقة المشروع",
+                "نماذج التعلم العميق: LSTM و MLP والهجين كما في وثيقة المشروع",
                 "تركيز على تداول: مخصص لسوق الأسهم السعودي",
                 "مقاييس الأداء: RMSE, MSE, و R² حسب المنهجية",
                 "واجهة مستخدم سهلة: تصميم عربي سهل الاستخدام",
@@ -143,18 +148,23 @@ def get_translations(language):
             'model_specs_list': [
                 "LSTM: طبقتان مع Dropout لمنع الإفراط في التمرين",
                 "MLP: مع تنشيط ReLU",
+                "الهجين: يجمع بين ميزات LSTM الزمنية وتعلم الأنماط في MLP",
                 "تطبيع البيانات: تحجيم Min-Max حسب المنهجية",
                 "السلاسل الزمنية: نهج النافذة المنزلقة للتنبؤ بالتسلسل"
             ],
             'performance_stats': "📈 إحصائيات أداء النماذج",
             'lstm_accuracy': "دقة LSTM",
             'mlp_accuracy': "دقة MLP",
+            'hybrid_accuracy': "دقة النموذج الهجين",
             'avg_r2': "متوسط R²",
             'historical_price': "السعر التاريخي",
             'future_forecast': "التنبؤات المستقبلية",
             'training_data': "بيانات التدريب",
             'actual_price': "السعر الفعلي",
-            'predicted_price': "السعر المتوقع"
+            'predicted_price': "السعر المتوقع",
+            'hybrid_description': "🤖 النموذج الهجين: يجمع بين تعلم التسلسل في LSTM والتعرف على الأنماط في MLP لتحسين الدقة",
+            'model_comparison': "📊 مقارنة النماذج",
+            'best_model': "🏆 أفضل نموذج أداء"
         }
     }
     return translations[language]
@@ -198,6 +208,13 @@ st.markdown("""
         color: white;
         text-align: center;
     }
+    .hybrid-card {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ffa726 100%);
+        padding: 1rem;
+        border-radius: 10px;
+        color: white;
+        text-align: center;
+    }
     .sidebar .sidebar-content {
         background: linear-gradient(180deg, #4b6cb7 0%, #182848 100%);
         color: white;
@@ -218,6 +235,13 @@ st.markdown("""
         top: 10px;
         right: 10px;
         z-index: 999;
+    }
+    .model-comparison {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1rem;
+        border-radius: 10px;
+        color: white;
+        margin: 1rem 0;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -301,6 +325,39 @@ class StockPredictor:
                      loss='mean_squared_error')
         return model
     
+    def build_hybrid_model(self, time_window, lstm_units=50, mlp_layers=[64, 32], dropout_rate=0.2):
+        """بناء النموذج الهجين / Build Hybrid model"""
+        # مدخل LSTM
+        lstm_input = Input(shape=(time_window, 1), name='lstm_input')
+        lstm_layer1 = LSTM(lstm_units, return_sequences=True)(lstm_input)
+        lstm_dropout1 = Dropout(dropout_rate)(lstm_layer1)
+        lstm_layer2 = LSTM(lstm_units, return_sequences=False)(lstm_dropout1)
+        lstm_dropout2 = Dropout(dropout_rate)(lstm_layer2)
+        lstm_output = Dense(25, activation='relu')(lstm_dropout2)
+        
+        # مدخل MLP (الميزات المسطحة)
+        mlp_input = Input(shape=(time_window,), name='mlp_input')
+        mlp_layer = Dense(mlp_layers[0], activation='relu')(mlp_input)
+        
+        for units in mlp_layers[1:]:
+            mlp_layer = Dense(units, activation='relu')(mlp_layer)
+        
+        # دمج مخرجات LSTM و MLP
+        combined = Concatenate()([lstm_output, mlp_layer])
+        
+        # طبقات إضافية بعد الدمج
+        combined_layer = Dense(32, activation='relu')(combined)
+        combined_layer = Dropout(dropout_rate)(combined_layer)
+        combined_layer = Dense(16, activation='relu')(combined_layer)
+        
+        # طبقة الإخراج
+        output_layer = Dense(1)(combined_layer)
+        
+        model = Model(inputs=[lstm_input, mlp_input], outputs=output_layer)
+        model.compile(optimizer=Adam(learning_rate=0.001), 
+                     loss='mean_squared_error')
+        return model
+    
     def train_model(self, x_train, y_train, model_type='LSTM', 
                    epochs=20, batch_size=32, time_window=60):
         """تدريب النموذج المختار / Train selected model"""
@@ -312,7 +369,7 @@ class StockPredictor:
                                    batch_size=batch_size, 
                                    epochs=epochs,
                                    verbose=0)
-        else:  # MLP
+        elif model_type == 'MLP':
             # إعادة تشكيل البيانات لـ MLP / Reshape data for MLP
             x_train_mlp = x_train.reshape(x_train.shape[0], x_train.shape[1])
             self.model = self.build_mlp_model(time_window)
@@ -320,6 +377,16 @@ class StockPredictor:
                                    batch_size=batch_size, 
                                    epochs=epochs,
                                    verbose=0)
+        else:  # Hybrid
+            self.model = self.build_hybrid_model(time_window)
+            # تحضير البيانات للنموذج الهجين
+            x_train_mlp = x_train.reshape(x_train.shape[0], x_train.shape[1])
+            history = self.model.fit(
+                [x_train, x_train_mlp], y_train,
+                batch_size=batch_size,
+                epochs=epochs,
+                verbose=0
+            )
         
         return history
     
@@ -327,9 +394,12 @@ class StockPredictor:
         """إجراء التنبؤات / Make predictions"""
         if model_type == 'LSTM':
             predictions = self.model.predict(x_test, verbose=0)
-        else:  # MLP
+        elif model_type == 'MLP':
             x_test_mlp = x_test.reshape(x_test.shape[0], x_test.shape[1])
             predictions = self.model.predict(x_test_mlp, verbose=0)
+        else:  # Hybrid
+            x_test_mlp = x_test.reshape(x_test.shape[0], x_test.shape[1])
+            predictions = self.model.predict([x_test, x_test_mlp], verbose=0)
         
         predictions = self.scaler.inverse_transform(predictions)
         return predictions
@@ -387,6 +457,40 @@ def create_performance_gauge(value, title, min_val, max_val):
     fig.update_layout(height=300)
     return fig
 
+def create_model_comparison_chart(metrics_dict, lang):
+    """إنشاء مخطط مقارنة النماذج / Create model comparison chart"""
+    models = list(metrics_dict.keys())
+    rmse_values = [metrics_dict[model]['rmse'] for model in models]
+    r2_values = [metrics_dict[model]['r2'] for model in models]
+    
+    fig = go.Figure()
+    
+    # إضافة RMSE
+    fig.add_trace(go.Bar(
+        name='RMSE' if lang == 'english' else 'جذر متوسط مربع الخطأ',
+        x=models,
+        y=rmse_values,
+        marker_color='indianred'
+    ))
+    
+    # إضافة R²
+    fig.add_trace(go.Bar(
+        name='R² Score' if lang == 'english' else 'معدل التحديد R²',
+        x=models,
+        y=r2_values,
+        marker_color='lightseagreen'
+    ))
+    
+    fig.update_layout(
+        title='Model Comparison' if lang == 'english' else 'مقارنة النماذج',
+        xaxis_title='Models' if lang == 'english' else 'النماذج',
+        yaxis_title='Score' if lang == 'english' else 'القيمة',
+        barmode='group',
+        height=400
+    )
+    
+    return fig
+
 def main():
     # Language selection
     col1, col2, col3 = st.columns([3, 1, 1])
@@ -417,7 +521,11 @@ def main():
             epochs = st.slider(t['epochs'], 10, 100, 20)
             batch_size = st.slider(t['batch_size'], 16, 64, 32)
         
-        model_type = st.selectbox(t['select_model'], ["LSTM", "MLP"])
+        model_type = st.selectbox(t['select_model'], ["LSTM", "MLP", "Hybrid"])
+        
+        # Show hybrid model description
+        if model_type == "Hybrid":
+            st.info(t['hybrid_description'])
         
         st.markdown("---")
         
@@ -481,236 +589,157 @@ def main():
         if st.session_state.run_training:
             st.markdown(f'<h2 class="section-header">{t["training_results"]}</h2>', unsafe_allow_html=True)
             
-            with st.spinner(t['training_model']):
-                # تحضير البيانات / Prepare data
-                x_train, y_train, x_test, y_test, training_data_len = predictor.prepare_data(
-                    df, time_window, test_ratio
-                )
-                
-                # شريط التقدم / Progress bar
-                progress_bar = st.progress(0)
-                status_text = st.empty()
-                
-                # تدريب النموذج / Train model
-                status_text.text(t['training_model'])
-                history = predictor.train_model(
-                    x_train, y_train, model_type, epochs, batch_size, time_window
-                )
-                progress_bar.progress(50)
-                
-                # إجراء التنبؤات / Make predictions
-                status_text.text(t['making_predictions'])
-                predictions = predictor.predict(x_test, model_type)
-                progress_bar.progress(75)
-                
-                # حساب المقاييس / Calculate metrics
-                mse, rmse, r2 = predictor.calculate_metrics(y_test, predictions)
-                progress_bar.progress(100)
-                status_text.text(t['completed'])
-                
-                # عرض النتائج / Display results
-                st.markdown(f"### {t['performance_metrics']}")
-                
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    st.plotly_chart(create_performance_gauge(rmse, "RMSE", 0, 0.1), use_container_width=True)
-                with col2:
-                    st.plotly_chart(create_performance_gauge(mse, "MSE", 0, 0.01), use_container_width=True)
-                with col3:
-                    st.plotly_chart(create_performance_gauge(r2, "R² Score", 0, 1), use_container_width=True)
-                
-                # منحنى الخسارة / Loss curve
-                st.markdown(f"### {t['training_loss']}")
-                fig_loss, ax = plt.subplots(figsize=(10, 4))
-                ax.plot(history.history['loss'], 
-                       label='Training Loss' if language == 'english' else 'فقدان التدريب', 
-                       linewidth=2)
-                ax.set_title(f'{t["training_loss"]} - {model_type}')
-                ax.set_xlabel('Epochs' if language == 'english' else 'الدورات')
-                ax.set_ylabel('Loss' if language == 'english' else 'الفقدان')
-                ax.legend()
-                ax.grid(True, alpha=0.3)
-                st.pyplot(fig_loss)
-                
-                # التنبؤ مقابل الفعلي / Prediction vs Actual
-                st.markdown(f"### {t['actual_vs_predicted']}")
-                
-                # إنشاء بيانات للرسم / Create data for plotting
-                train = df[:training_data_len]
-                valid = df[training_data_len:]
-                valid = valid.copy()
-                valid['Predictions'] = predictions
-                
-                fig_comparison = go.Figure()
-                fig_comparison.add_trace(go.Scatter(
-                    x=train['Date'], y=train['Price'],
-                    name=t['training_data'],
-                    line=dict(color='blue', width=2)
-                ))
-                fig_comparison.add_trace(go.Scatter(
-                    x=valid['Date'], y=valid['Price'],
-                    name=t['actual_price'],
-                    line=dict(color='green', width=2)
-                ))
-                fig_comparison.add_trace(go.Scatter(
-                    x=valid['Date'], y=valid['Predictions'],
-                    name=t['predicted_price'],
-                    line=dict(color='red', width=2, dash='dash')
-                ))
-                
-                fig_comparison.update_layout(
-                    title=f'{t["actual_vs_predicted"]} - {model_type}',
-                    xaxis_title='Date' if language == 'english' else 'التاريخ',
-                    yaxis_title='Price' if language == 'english' else 'السعر',
-                    height=500,
-                    template='plotly_white'
-                )
-                
-                st.plotly_chart(fig_comparison, use_container_width=True)
-                
-                # التنبؤات المستقبلية / Future predictions
-                st.markdown(f"### {t['future_predictions']}")
-                
-                # الحصول على آخر أيام نافذة الزمن / Get last time window days
-                last_time_window_days = df['Price'].values[-time_window:]
-                last_time_window_days_scaled = predictor.scaler.transform(
-                    last_time_window_days.reshape(-1, 1)
-                )
-                
-                # التنبؤ بـ 30 يوم القادمة / Predict next 30 days
-                future_predictions = []
-                current_batch = last_time_window_days_scaled.reshape(1, time_window, 1)
-                
-                for i in range(30):
-                    if model_type == 'LSTM':
-                        current_pred = predictor.model.predict(current_batch, verbose=0)[0]
-                    else:
-                        current_batch_mlp = current_batch.reshape(1, time_window)
-                        current_pred = predictor.model.predict(current_batch_mlp, verbose=0)[0]
-                    
-                    future_predictions.append(current_pred[0])
-                    
-                    # تحديث الدفعة للتنبؤ التالي / Update batch for next prediction
-                    current_batch = np.append(
-                        current_batch[:, 1:, :], 
-                        [[[current_pred[0]]]], 
-                        axis=1
+            # Train all models for comparison if hybrid is selected
+            models_to_train = ["LSTM", "MLP", "Hybrid"] if model_type == "Hybrid" else [model_type]
+            all_metrics = {}
+            all_predictions = {}
+            all_histories = {}
+            
+            for current_model in models_to_train:
+                with st.spinner(f"{t['training_model']} ({current_model})"):
+                    # تحضير البيانات / Prepare data
+                    x_train, y_train, x_test, y_test, training_data_len = predictor.prepare_data(
+                        df, time_window, test_ratio
                     )
-                
-                future_predictions = predictor.scaler.inverse_transform(
-                    np.array(future_predictions).reshape(-1, 1)
-                )
-                
-                # إنشاء التواريخ المستقبلية / Create future dates
-                last_date = df['Date'].iloc[-1]
-                future_dates = pd.date_range(
-                    start=last_date + timedelta(days=1), 
-                    periods=30, 
-                    freq='D'
-                )
-                
-                # رسم التنبؤات المستقبلية / Plot future predictions
-                fig_future = go.Figure()
-                fig_future.add_trace(go.Scatter(
-                    x=df['Date'][-100:], y=df['Price'][-100:],
-                    name=t['historical_price'],
-                    line=dict(color='blue', width=2)
-                ))
-                fig_future.add_trace(go.Scatter(
-                    x=future_dates, y=future_predictions.flatten(),
-                    name=t['future_forecast'],
-                    line=dict(color='red', width=2, dash='dash')
-                ))
-                
-                fig_future.update_layout(
-                    title=t['future_predictions'],
-                    xaxis_title='Date' if language == 'english' else 'التاريخ',
-                    yaxis_title='Price' if language == 'english' else 'السعر',
-                    height=500,
-                    template='plotly_white'
-                )
-                
-                st.plotly_chart(fig_future, use_container_width=True)
-                
-                # تحميل التنبؤات / Download predictions
-                st.markdown(f"### {t['download_results']}")
-                
-                # إنشاء بيانات للتحميل / Create data for download
-                date_col = 'Date' if language == 'english' else 'التاريخ'
-                price_col = 'Predicted_Price' if language == 'english' else 'السعر_المتوقع'
-                model_col = 'Model_Used' if language == 'english' else 'النموذج_المستخدم'
-                prediction_col = 'Prediction_Date' if language == 'english' else 'تاريخ_التنبؤ'
-                
-                future_df = pd.DataFrame({
-                    date_col: future_dates,
-                    price_col: future_predictions.flatten(),
-                    model_col: model_type,
-                    prediction_col: datetime.now().strftime("%Y-%m-%d")
-                })
-                
-                csv = future_df.to_csv(index=False, encoding='utf-8-sig')
-                st.download_button(
-                    label=t['download_button'],
-                    data=csv,
-                    file_name=f"future_predictions_{model_type}_{datetime.now().strftime('%Y%m%d')}.csv",
-                    mime="text/csv"
-                )
-                
-                st.success(t['training_completed'])
-    
-    else:
-        # صفحة الترحيب / Welcome page
-        st.markdown(f"""
-        <div style='text-align: center; padding: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; color: white;'>
-            <h2>{t['welcome']}</h2>
-            <p style='font-size: 1.2rem;'>{t['welcome_desc']}</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown(f"### {t['data_format']}")
-            st.markdown(f"{t['data_columns']}")
-            st.markdown(f"- **{t['date_col']}**")
-            st.markdown(f"- **{t['price_col']}**")
-            st.markdown(f"- **{t['open_col']}**")
-            st.markdown(f"- **{t['high_col']}**")
-            st.markdown(f"- **{t['low_col']}**")
-            st.markdown(f"- **{t['vol_col']}**")
-            st.markdown(f"- **{t['change_col']}**")
+                    
+                    # تدريب النموذج / Train model
+                    history = predictor.train_model(
+                        x_train, y_train, current_model, epochs, batch_size, time_window
+                    )
+                    
+                    # إجراء التنبؤات / Make predictions
+                    predictions = predictor.predict(x_test, current_model)
+                    
+                    # حساب المقاييس / Calculate metrics
+                    mse, rmse, r2 = predictor.calculate_metrics(y_test, predictions)
+                    
+                    # تخزين النتائج
+                    all_metrics[current_model] = {'mse': mse, 'rmse': rmse, 'r2': r2}
+                    all_predictions[current_model] = predictions
+                    all_histories[current_model] = history
             
-            # مثال على البيانات / Sample data
-            sample_data = pd.DataFrame({
-                'Date': ['01/01/2023', '01/02/2023', '01/03/2023'],
-                'Price': [0.3858, 0.4083, 0.4437],
-                'Open': [0.3806, 0.3870, 0.4096],
-                'High': [0.3589, 0.3717, 0.4006],
-                'Low': [0.3973, 0.3941, 0.4299],
-                'Vol.': [0.0474, 0.0728, 0.1252],
-                'Change %': [0.5222, 0.5759, 0.6275]
-            })
-            st.dataframe(sample_data, use_container_width=True)
-        
-        with col2:
-            st.markdown(f"### {t['features']}")
-            for feature in t['features_list']:
-                st.markdown(f"- **{feature}**")
+            # عرض مقارنة النماذج إذا كان الهجين / Show model comparison if hybrid
+            if model_type == "Hybrid":
+                st.markdown(f"### {t['model_comparison']}")
+                
+                # إنشاء مخطط المقارنة
+                comparison_fig = create_model_comparison_chart(all_metrics, language)
+                st.plotly_chart(comparison_fig, use_container_width=True)
+                
+                # تحديد أفضل نموذج
+                best_model = min(all_metrics.keys(), key=lambda x: all_metrics[x]['rmse'])
+                st.markdown(f"### {t['best_model']}: **{best_model}**")
+                
+                # عرض مقاييس جميع النماذج
+                col1, col2, col3 = st.columns(3)
+                models_display = ["LSTM", "MLP", "Hybrid"]
+                colors = ["blue", "green", "orange"]
+                
+                for i, model in enumerate(models_display):
+                    with [col1, col2, col3][i]:
+                        if model in all_metrics:
+                            metric_color = "orange" if model == best_model else colors[i]
+                            st.markdown(f"""
+                            <div style='background: linear-gradient(135deg, {colors[i]} 0%, {colors[i]}80 100%); 
+                                        padding: 1rem; border-radius: 10px; color: white; text-align: center;'>
+                                <h4>{model}</h4>
+                                <p><strong>RMSE:</strong> {all_metrics[model]['rmse']:.6f}</p>
+                                <p><strong>R²:</strong> {all_metrics[model]['r2']:.4f}</p>
+                            </div>
+                            """, unsafe_allow_html=True)
+                
+                # استخدام أفضل نموذج للعروض التالية
+                best_predictions = all_predictions[best_model]
+                best_history = all_histories[best_model]
+                display_model = best_model
+            else:
+                # استخدام النموذج المختار للعروض التالية
+                best_predictions = all_predictions[model_type]
+                best_history = all_histories[model_type]
+                display_model = model_type
             
-            st.markdown(f"### {t['model_specs']}")
-            for spec in t['model_specs_list']:
-                st.markdown(f"- **{spec}**")
-        
-        # إحصائيات وهمية للعرض / Demo performance statistics
-        st.markdown(f"### {t['performance_stats']}")
-        
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric(t['lstm_accuracy'], "94.2%", "1.2%")
-        with col2:
-            st.metric(t['mlp_accuracy'], "92.8%", "0.8%")
-        with col3:
-            st.metric(t['avg_r2'], "0.89", "0.03")
-
-if __name__ == "__main__":
-    main()
+            # عرض النتائج / Display results
+            st.markdown(f"### {t['performance_metrics']} - {display_model}")
+            
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.plotly_chart(create_performance_gauge(all_metrics[display_model]['rmse'], "RMSE", 0, 0.1), use_container_width=True)
+            with col2:
+                st.plotly_chart(create_performance_gauge(all_metrics[display_model]['mse'], "MSE", 0, 0.01), use_container_width=True)
+            with col3:
+                st.plotly_chart(create_performance_gauge(all_metrics[display_model]['r2'], "R² Score", 0, 1), use_container_width=True)
+            
+            # منحنى الخسارة / Loss curve
+            st.markdown(f"### {t['training_loss']} - {display_model}")
+            fig_loss, ax = plt.subplots(figsize=(10, 4))
+            ax.plot(best_history.history['loss'], 
+                   label='Training Loss' if language == 'english' else 'فقدان التدريب', 
+                   linewidth=2)
+            ax.set_title(f'{t["training_loss"]} - {display_model}')
+            ax.set_xlabel('Epochs' if language == 'english' else 'الدورات')
+            ax.set_ylabel('Loss' if language == 'english' else 'الفقدان')
+            ax.legend()
+            ax.grid(True, alpha=0.3)
+            st.pyplot(fig_loss)
+            
+            # التنبؤ مقابل الفعلي / Prediction vs Actual
+            st.markdown(f"### {t['actual_vs_predicted']} - {display_model}")
+            
+            # إنشاء بيانات للرسم / Create data for plotting
+            train = df[:training_data_len]
+            valid = df[training_data_len:]
+            valid = valid.copy()
+            valid['Predictions'] = best_predictions
+            
+            fig_comparison = go.Figure()
+            fig_comparison.add_trace(go.Scatter(
+                x=train['Date'], y=train['Price'],
+                name=t['training_data'],
+                line=dict(color='blue', width=2)
+            ))
+            fig_comparison.add_trace(go.Scatter(
+                x=valid['Date'], y=valid['Price'],
+                name=t['actual_price'],
+                line=dict(color='green', width=2)
+            ))
+            fig_comparison.add_trace(go.Scatter(
+                x=valid['Date'], y=valid['Predictions'],
+                name=t['predicted_price'],
+                line=dict(color='red', width=2, dash='dash')
+            ))
+            
+            fig_comparison.update_layout(
+                title=f'{t["actual_vs_predicted"]} - {display_model}',
+                xaxis_title='Date' if language == 'english' else 'التاريخ',
+                yaxis_title='Price' if language == 'english' else 'السعر',
+                height=500,
+                template='plotly_white'
+            )
+            
+            st.plotly_chart(fig_comparison, use_container_width=True)
+            
+            # التنبؤات المستقبلية / Future predictions
+            st.markdown(f"### {t['future_predictions']} - {display_model}")
+            
+            # استخدام النموذج الأفضل للتنبؤات المستقبلية
+            predictor.model_type = display_model
+            if display_model == "Hybrid":
+                predictor.model = all_histories[display_model].model
+            
+            # الحصول على آخر أيام نافذة الزمن / Get last time window days
+            last_time_window_days = df['Price'].values[-time_window:]
+            last_time_window_days_scaled = predictor.scaler.transform(
+                last_time_window_days.reshape(-1, 1)
+            )
+            
+            # التنبؤ بـ 30 يوم القادمة / Predict next 30 days
+            future_predictions = []
+            current_batch = last_time_window_days_scaled.reshape(1, time_window, 1)
+            
+            for i in range(30):
+                if display_model == 'LSTM':
+                    current_pred = predictor.model.predict(current_batch, verbose=0)[0]
+                elif display_model == 'MLP':
+                    current_batch_mlp = current_batch.reshape(1, time_window)
+                    current_pred = predictor.model.predict(current_batch_mlp, verbose=0)[0]
+                else:  # Hybrid
