@@ -330,6 +330,7 @@ texts = {
             </ul>
             
             <h4>🎯 Training Process</h4>
+            <p>The training process involves the following steps:</p>
             <ul>
                 <li>Data is split into training (80%) and testing (20%) sets</li>
                 <li>Model learns from historical price patterns</li>
@@ -338,6 +339,7 @@ texts = {
             </ul>
             
             <h4>📈 Prediction & Analysis</h4>
+            <p>The system provides comprehensive predictions and analysis:</p>
             <ul>
                 <li>Generates future price forecasts</li>
                 <li>Provides confidence intervals</li>
@@ -346,6 +348,7 @@ texts = {
             </ul>
             
             <h4>💡 How to Use</h4>
+            <p>Follow these steps to use the system:</p>
             <ol>
                 <li>Select your data source (TASI stocks or file upload)</li>
                 <li>Configure model parameters in the settings</li>
@@ -448,6 +451,7 @@ texts = {
             </ul>
             
             <h4>🎯 عملية التدريب</h4>
+            <p>تشمل عملية التدريب الخطوات التالية:</p>
             <ul>
                 <li>يتم تقسيم البيانات إلى مجموعات تدريب (80٪) واختبار (20٪)</li>
                 <li>يتعلم النموذج من أنماط الأسعار التاريخية</li>
@@ -456,6 +460,7 @@ texts = {
             </ul>
             
             <h4>📈 التنبؤ والتحليل</h4>
+            <p>يوفر النظام تنبؤات وتحليلات شاملة:</p>
             <ul>
                 <li>يولد تنبؤات الأسعار المستقبلية</li>
                 <li>يوفر فترات ثقة</li>
@@ -464,6 +469,7 @@ texts = {
             </ul>
             
             <h4>💡 كيفية الاستخدام</h4>
+            <p>اتبع هذه الخطوات لاستخدام النظام:</p>
             <ol>
                 <li>اختر مصدر البيانات (أسهم تاسي أو رفع ملف)</li>
                 <li>اضبط معاملات النموذج في الإعدادات</li>
@@ -723,14 +729,14 @@ if df is not None and 'Close' in df.columns:
                     close_min = float(df['Close'].min())
                     close_max = float(df['Close'].max())
                     st.metric(
-                        "Close Price Range", 
-                        f"${close_min:.2f} - ${close_max:.2f}"
-                    )
-                
-                # Show other columns info
-                if 'Volume' in df.columns:
-                    volume_mean = float(df['Volume'].mean())
-                    st.metric("Avg Volume", f"{volume_mean:.0f}")
+    "Close Price Range", 
+    f"${close_min:.2f} - ${close_max:.2f}"
+)
+
+            # Show other columns info
+            if 'Volume' in df.columns:
+                volume_mean = float(df['Volume'].mean())
+                st.metric("Avg Volume", f"{volume_mean:.0f}")
                 
         except Exception as e:
             st.error(f"❌ Data processing failed: {str(e)}")
