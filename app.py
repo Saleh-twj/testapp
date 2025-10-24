@@ -661,171 +661,73 @@ if df is not None and 'Close' in df.columns:
             st.metric(t["total_return"], "N/A")
 
     # ------------------------------
-    # 🔄 DATA NORMALIZATION - FIXED VERSION
+    # 🔄 DATA NORMALIZATION - COMPLETELY FIXED VERSION
     # ------------------------------
     st.markdown(f'<div class="section-header">{t["preprocessing"]}</div>', unsafe_allow_html=True)
     
     def normalize_stock_data(df):
         """
-        Normalize stock data by cleaning and applying MinMax scaling
+        Simple and safe normalization for yfinance data
         """
         df = df.copy()
         
-        st.info("🔄 Cleaning and normalizing stock data...")
+        st.info("🔄 Cleaning stock data...")
         
-        # Determine which columns we have available
-        available_columns = [str(col) for col in df.columns.tolist()]
-        st.write(f"📊 Available columns: {', '.join(available_columns)}")
-        
-        # Define target columns for normalization (EXCLUDE 'Close' for model training)
-        possible_columns = ["Price", "Open", "High", "Low", "Vol.", "Change %", "Volume"]
-        columns_to_normalize = []
-        
-        for col in possible_columns:
-            if col in df.columns:
-                columns_to_normalize.append(col)
-        
-        st.write(f"🎯 Columns to normalize: {', '.join(columns_to_normalize)}")
-        
-        # Clean Volume/Vol. column if it exists - FIXED VERSION
-        volume_column = None
-        if "Vol." in df.columns:
-            volume_column = "Vol."
-        elif "Volume" in df.columns:
-            volume_column = "Volume"
-        
-        if volume_column:
-            def clean_volume(val):
-                try:
-                    # Handle NaN/None values first
-                    if val is None or (isinstance(val, float) and np.isnan(val)):
-                        return 0.0
-                    
-                    # Handle string values
-                    if isinstance(val, str):
-                        val = val.replace(",", "").strip()
-                        if val.endswith("B"):
-                            return float(val[:-1]) * 1_000_000_000
-                        elif val.endswith("M"):
-                            return float(val[:-1]) * 1_000_000
-                        elif val.endswith("K"):
-                            return float(val[:-1]) * 1_000
-                        else:
-                            return float(val)
-                    
-                    # Handle numeric values
-                    return float(val)
-                    
-                except (ValueError, TypeError):
-                    return 0.0
-            
-            # Apply cleaning safely using list comprehension
-            df[volume_column] = [clean_volume(x) for x in df[volume_column]]
-            st.success(f"✅ Cleaned {volume_column} column")
-        
-        # Clean Change % column if it exists
-        if "Change %" in df.columns:
-            try:
-                df["Change %"] = df["Change %"].astype(str).str.replace("%", "", regex=False)
-                df["Change %"] = pd.to_numeric(df["Change %"], errors='coerce').fillna(0)
-                st.success("✅ Cleaned Change % column")
-            except Exception as e:
-                st.warning(f"⚠️ Could not clean Change % column: {e}")
-        
-        # Clean numeric columns (remove commas and convert to float)
-        numeric_columns = ["Price", "Open", "High", "Low"]
-        for col in numeric_columns:
-            if col in df.columns:
-                try:
-                    df[col] = df[col].astype(str).str.replace(",", "")
-                    df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
-                    st.success(f"✅ Cleaned {col} column")
-                except Exception as e:
-                    st.warning(f"⚠️ Could not clean {col} column: {e}")
-        
-        # Clean Close column separately (don't normalize it for model training)
-        if "Close" in df.columns:
-            try:
-                df["Close"] = df["Close"].astype(str).str.replace(",", "")
-                df["Close"] = pd.to_numeric(df["Close"], errors='coerce')
-                # Remove rows where Close is NaN after conversion
+        try:
+            # Clean the Close column (most important for predictions)
+            if 'Close' in df.columns:
+                df['Close'] = pd.to_numeric(df['Close'], errors='coerce')
                 df = df.dropna(subset=['Close'])
                 st.success("✅ Cleaned Close column")
-            except Exception as e:
-                st.error(f"❌ Error cleaning Close column: {e}")
-        
-        # Apply MinMax scaling to selected columns (EXCLUDING 'Close')
-        if columns_to_normalize:
-            scaler = MinMaxScaler()
             
-            # Only normalize columns that have numeric data
-            valid_columns = []
-            for col in columns_to_normalize:
-                if col in df.columns and pd.api.types.is_numeric_dtype(df[col]):
-                    valid_columns.append(col)
+            # Just ensure other numeric columns are clean but don't normalize them
+            # For yfinance data, we don't need complex normalization
+            numeric_columns = ['Open', 'High', 'Low', 'Volume']
+            for col in numeric_columns:
+                if col in df.columns:
+                    df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
             
-            if valid_columns:
-                try:
-                    # Handle any remaining NaN values
-                    df[valid_columns] = df[valid_columns].fillna(0)
-                    
-                    # Apply normalization
-                    df[valid_columns] = scaler.fit_transform(df[valid_columns])
-                    st.success(f"✅ Applied MinMax normalization to: {', '.join(valid_columns)}")
-                    
-                    # Show normalization examples
-                    if len(valid_columns) > 0:
-                        st.markdown("**🔍 Normalization Examples:**")
-                        norm_cols = st.columns(min(3, len(valid_columns)))
-                        for i, col in enumerate(valid_columns[:3]):
-                            with norm_cols[i]:
-                                st.metric(f"{col} (Normalized)", f"{df[col].iloc[0]:.3f}")
-                                
-                except Exception as e:
-                    st.error(f"❌ Error during normalization: {e}")
-            else:
-                st.warning("⚠️ No valid numeric columns found for normalization")
-        else:
-            st.warning("⚠️ No columns available for normalization")
+            st.success("✅ Data cleaning completed successfully!")
+            
+            # Show data info
+            st.write(f"📊 Cleaned data shape: {df.shape}")
+            st.write(f"🔢 Available numeric columns: {[col for col in df.columns if pd.api.types.is_numeric_dtype(df[col])]}")
+            
+        except Exception as e:
+            st.error(f"❌ Error during data cleaning: {e}")
+            st.info("⚠️ Continuing with original data...")
         
         return df
 
     # Apply normalization
-    with st.spinner("🔄 Normalizing stock data..."):
+    with st.spinner("🔄 Processing stock data..."):
         try:
-            df_normalized = normalize_stock_data(df)
-            df = df_normalized
-            st.success("✅ Data normalization completed!")
+            df_cleaned = normalize_stock_data(df)
+            df = df_cleaned
+            st.success("✅ Data processing completed!")
             
-            # Show normalized data preview
+            # Show cleaned data preview
             col_norm1, col_norm2 = st.columns([2, 1])
             
             with col_norm1:
-                st.markdown("**📊 Normalized Data Preview**")
+                st.markdown("**📊 Processed Data Preview**")
                 st.dataframe(df.head(10), use_container_width=True)
             
             with col_norm2:
-                st.markdown("**📈 Data Ranges**")
-                # Show Close price range (should be original values)
+                st.markdown("**📈 Data Statistics**")
+                # Show Close price range
                 if 'Close' in df.columns:
                     st.metric(
                         "Close Price Range", 
                         f"${df['Close'].min():.2f} - ${df['Close'].max():.2f}"
                     )
                 
-                # Show normalized columns ranges
-                normalized_cols = [col for col in ["Open", "High", "Low", "Vol.", "Volume", "Change %"] 
-                                 if col in df.columns and pd.api.types.is_numeric_dtype(df[col])]
+                # Show other columns info
+                if 'Volume' in df.columns:
+                    st.metric("Avg Volume", f"{df['Volume'].mean():.0f}")
                 
-                for col in normalized_cols[:3]:
-                    if col in df.columns:
-                        st.metric(
-                            f"{col} Range", 
-                            f"{df[col].min():.3f} - {df[col].max():.3f}"
-                        )
-                        
         except Exception as e:
-            st.error(f"❌ Normalization failed: {e}")
+            st.error(f"❌ Data processing failed: {e}")
             st.info("⚠️ Continuing with original data...")
 
     # ------------------------------
