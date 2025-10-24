@@ -596,20 +596,25 @@ if data_source == t["tasi_search"]:
             try:
                 symbol = tasi_stocks[selected_stock]
                 stock_data = yf.download(symbol, period=period)
-                
+            
                 if not stock_data.empty:
                     df = stock_data.reset_index()
-                    # Ensure we have the required columns
-                    if 'Close' not in df.columns:
-                        st.error("❌ No closing price data available for this stock")
-                    else:
-                        st.success(f"✅ Loaded {len(df)} days of historical data for {selected_stock}")
-                        st.session_state.df = df
+                # FIX: Flatten MultiIndex columns if present (common with yfinance)
+                    if isinstance(df.columns, pd.MultiIndex):
+                        df.columns = df.columns.droplevel(1)  # Drops the ticker level, e.g., ('Close', '1120.SR') -> 'Close'
+                
+                # Ensure we have the required columns
+                        if 'Close' not in df.columns:
+                            st.error("❌ No closing price data available for this stock")
                 else:
-                    st.error("❌ No historical data found for this stock")
-                    
+                    st.success(f"✅ Loaded {len(df)} days of historical data for {selected_stock}")
+                    st.session_state.df = df
+                
+                st.error("❌ No historical data found for this stock")
+                
             except Exception as e:
                 st.error(f"❌ Error loading data: {str(e)}")
+
 
 else:  # File Upload
     upload_col1, upload_col2 = st.columns([2, 1])
@@ -672,41 +677,52 @@ if df is not None and 'Close' in df.columns:
     st.markdown(f'<div class="section-header">{t["preprocessing"]}</div>', unsafe_allow_html=True)
     
     def normalize_stock_data(df):
-        """
-        Simple and safe normalization for yfinance data
-        """
+   # Simple and safe normalization for yfinance data
+    
         df = df.copy()
-        
+    
         st.info("🔄 Cleaning stock data...")
-        
+    
         try:
             # Clean the Close column (most important for predictions)
             if 'Close' in df.columns:
-                # Convert to numeric and handle errors
-                df['Close'] = pd.to_numeric(df['Close'], errors='coerce')
-                # Remove rows where Close is NaN after conversion
-                df = df.dropna(subset=['Close'])
-                st.success("✅ Cleaned Close column")
-            
+                close_data = df['Close']
+                if isinstance(close_data, pd.Series):
+                    df['Close'] = pd.to_numeric(close_data, errors='coerce')
+                    # Remove rows where Close is NaN after conversion
+                    df = df.dropna(subset=['Close'])
+                    st.success("✅ Cleaned Close column")
+                else:
+                    st.error("❌ Close column is not a valid Series")
+        
             # Just ensure other numeric columns are clean but don't normalize them
             # For yfinance data, we don't need complex normalization
             numeric_columns = ['Open', 'High', 'Low', 'Volume']
             for col in numeric_columns:
                 if col in df.columns:
-                    df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
-            
+                    col_data = df[col]
+                    if isinstance(col_data, pd.Series):
+                        df[col] = pd.to_numeric(col_data, errors='coerce').fillna(0)
+        
             st.success("✅ Data cleaning completed successfully!")
-            
+        
             # Show data info - FIXED: Use proper string formatting
             st.write(f"📊 Cleaned data shape: {df.shape}")
-            numeric_cols = [col for col in df.columns if pd.api.types.is_numeric_dtype(df[col])]
+            numeric_cols = []
+            for col in df.columns:
+                try:
+                    if pd.api.types.is_numeric_dtype(df[col]):
+                        numeric_cols.append(col)
+                except:
+                    pass  # Skip problematic columns
             st.write(f"🔢 Available numeric columns: {numeric_cols}")
-            
+        
         except Exception as e:
             st.error(f"❌ Error during data cleaning: {str(e)}")
             st.info("⚠️ Continuing with original data...")
-        
+    
         return df
+
 
     # Apply normalization
     with st.spinner("🔄 Processing stock data..."):
