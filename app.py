@@ -311,54 +311,54 @@ texts = {
         'learn_more_title': '📚 How This Stock Prediction System Works',
         'learn_more_content': '''
         <div class="learn-more-content">
-            <h3>🔍 How the System Works</h3>
+            🔍 How the System Works
             
-            <h4>📊 Data Processing</h4>
-            <p>The system processes historical stock data through several steps:</p>
-            <ul>
-                <li><strong>Data Collection:</strong> Fetches real-time TASI stock data or accepts uploaded files</li>
-                <li><strong>Data Cleaning:</strong> Handles missing values, converts formats, and normalizes data</li>
-                <li><strong>Normalization:</strong> Scales all values between 0-1 using MinMaxScaler for better model performance</li>
-            </ul>
+            📊 Data Processing
+            The system processes historical stock data through several steps:
             
-            <h4>🤖 AI Model Architecture</h4>
-            <p>Three different neural network models are available:</p>
-            <ul>
-                <li><strong>LSTM:</strong> Long Short-Term Memory networks ideal for time series data</li>
-                <li><strong>MLP:</strong> Multi-Layer Perceptron for simpler patterns</li>
-                <li><strong>Hybrid:</strong> Combines LSTM and dense layers for complex patterns</li>
-            </ul>
+                Data Collection: Fetches real-time TASI stock data or accepts uploaded files
+                Data Cleaning: Handles missing values, converts formats, and normalizes data
+                Normalization: Scales all values between 0-1 using MinMaxScaler for better model performance
             
-            <h4>🎯 Training Process</h4>
-            <p>The training process involves the following steps:</p>
-            <ul>
-                <li>Data is split into training (80%) and testing (20%) sets</li>
-                <li>Model learns from historical price patterns</li>
-                <li>Early stopping prevents overfitting</li>
-                <li>Multiple epochs refine prediction accuracy</li>
-            </ul>
             
-            <h4>📈 Prediction & Analysis</h4>
-            <p>The system provides comprehensive predictions and analysis:</p>
-            <ul>
-                <li>Generates future price forecasts</li>
-                <li>Provides confidence intervals</li>
-                <li>Visualizes predictions vs actual prices</li>
-                <li>Calculates performance metrics (RMSE, R², MAPE)</li>
-            </ul>
+            🤖 AI Model Architecture
+            Three different neural network models are available:
             
-            <h4>💡 How to Use</h4>
-            <p>Follow these steps to use the system:</p>
-            <ol>
-                <li>Select your data source (TASI stocks or file upload)</li>
-                <li>Configure model parameters in the settings</li>
-                <li>Load and preview your data</li>
-                <li>Train the AI model</li>
-                <li>Analyze predictions and export results</li>
-            </ol>
+                LSTM: Long Short-Term Memory networks ideal for time series data
+                MLP: Multi-Layer Perceptron for simpler patterns
+                Hybrid: Combines LSTM and dense layers for complex patterns
             
-            <p><strong>Note:</strong> Stock predictions are based on historical patterns and should be used as one of many tools in your investment decision process.</p>
-        </div>
+            
+            🎯 Training Process
+            The training process involves the following steps:
+            
+                Data is split into training (80%) and testing (20%) sets
+                Model learns from historical price patterns
+                Early stopping prevents overfitting
+                Multiple epochs refine prediction accuracy
+            
+            
+            📈 Prediction & Analysis
+            The system provides comprehensive predictions and analysis:
+            
+                Generates future price forecasts
+                Provides confidence intervals
+                Visualizes predictions vs actual prices
+                Calculates performance metrics (RMSE, R², MAPE)
+            
+            
+            💡 How to Use
+            Follow these steps to use the system:
+            
+                Select your data source (TASI stocks or file upload)
+                Configure model parameters in the settings
+                Load and preview your data
+                Train the AI model
+                Analyze predictions and export results
+            
+            
+            Note:Stock predictions are based on historical patterns and should be used as one of many tools in your investment decision process.
+        
         '''
     },
     'Arabic': {
@@ -432,54 +432,54 @@ texts = {
         'learn_more_title': '📚 كيف يعمل نظام توقع الأسهم هذا',
         'learn_more_content': '''
         <div class="learn-more-content" style="text-align: right; direction: rtl;">
-            <h3>🔍 كيف يعمل النظام</h3>
+            🔍 كيف يعمل النظام
             
-            <h4>📊 معالجة البيانات</h4>
-            <p>يقوم النظام بمعالجة بيانات الأسهم التاريخية من خلال عدة خطوات:</p>
-            <ul>
-                <li><strong>جمع البيانات:</strong> يجلب بيانات أسهم تاسي في الوقت الحقيقي أو يقبل الملفات المرفوعة</li>
-                <li><strong>تنظيف البيانات:</strong> يتعامل مع القيم المفقودة، يحول التنسيقات، ويطبع البيانات</li>
-                <li><strong>التطبيع:</strong> يقيس جميع القيم بين 0-1 باستخدام MinMaxScaler لأداء أفضل للنموذج</li>
-            </ul>
+            📊 معالجة البيانات
+            يقوم النظام بمعالجة بيانات الأسهم التاريخية من خلال عدة خطوات:</p>
             
-            <h4>🤖 بنية النموذج الذكي</h4>
-            <p>ثلاثة نماذج مختلفة للشبكات العصبية متاحة:</p>
-            <ul>
-                <li><strong>LSTM:</strong> شبكات الذاكرة طويلة المدى المثالية لبيانات السلاسل الزمنية</li>
-                <li><strong>MLP:</strong>多层感知器 للأنماط البسيطة</li>
-                <li><strong>Hybrid:</strong> يجمع بين طبقات LSTM والطبقات الكثيفة للأنماط المعقدة</li>
-            </ul>
+                جمع البيانات: يجلب بيانات أسهم تاسي في الوقت الحقيقي أو يقبل الملفات المرفوعة
+                تنظيف البيانات: يتعامل مع القيم المفقودة، يحول التنسيقات، ويطبع البيانات
+                التطبيع: يقيس جميع القيم بين 0-1 باستخدام MinMaxScaler لأداء أفضل للنموذج
             
-            <h4>🎯 عملية التدريب</h4>
-            <p>تشمل عملية التدريب الخطوات التالية:</p>
-            <ul>
-                <li>يتم تقسيم البيانات إلى مجموعات تدريب (80٪) واختبار (20٪)</li>
-                <li>يتعلم النموذج من أنماط الأسعار التاريخية</li>
-                <li>التوقف المبكر يمنع الإفراط في التجهيز</li>
-                <li>دورات متعددة تحسن دقة التنبؤ</li>
-            </ul>
             
-            <h4>📈 التنبؤ والتحليل</h4>
-            <p>يوفر النظام تنبؤات وتحليلات شاملة:</p>
-            <ul>
-                <li>يولد تنبؤات الأسعار المستقبلية</li>
-                <li>يوفر فترات ثقة</li>
-                <li>يصور التنبؤات مقابل الأسعار الفعلية</li>
-                <li>يحسب مقاييس الأداء (RMSE, R², MAPE)</li>
-            </ul>
+            🤖 بنية النموذج الذكي
+            ثلاثة نماذج مختلفة للشبكات العصبية متاحة:</p>
             
-            <h4>💡 كيفية الاستخدام</h4>
-            <p>اتبع هذه الخطوات لاستخدام النظام:</p>
-            <ol>
-                <li>اختر مصدر البيانات (أسهم تاسي أو رفع ملف)</li>
-                <li>اضبط معاملات النموذج في الإعدادات</li>
-                <li>قم بتحميل ومعاينة بياناتك</li>
-                <li>درب النموذج الذكي</li>
-                <li>حلل التنبؤات وقم بتصدير النتائج</li>
-            </ol>
+                LSTM: شبكات الذاكرة طويلة المدى المثالية لبيانات السلاسل الزمنية
+                MLP: للأنماط البسيطة
+                Hybrid: يجمع بين طبقات LSTM والطبقات الكثيفة للأنماط المعقدة
             
-            <p><strong>ملاحظة:</strong> تنبؤات الأسهم تستند إلى الأنماط التاريخية ويجب استخدامها كأحد الأدوات العديدة في عملية قرار الاستثمار.</p>
-        </div>
+            
+            🎯 عملية التدريب
+            تشمل عملية التدريب الخطوات التالية:</p>
+            
+                يتم تقسيم البيانات إلى مجموعات تدريب (80٪) واختبار (20٪)
+                يتعلم النموذج من أنماط الأسعار التاريخية
+                التوقف المبكر يمنع الإفراط في التجهيز
+                دورات متعددة تحسن دقة التنبؤ
+            
+            
+            📈 التنبؤ والتحليل
+            يوفر النظام تنبؤات وتحليلات شاملة:</p>
+            
+                يولد تنبؤات الأسعار المستقبلية
+                يوفر فترات ثقة
+                يصور التنبؤات مقابل الأسعار الفعلية
+                يحسب مقاييس الأداء (RMSE, R², MAPE)
+            
+            
+            💡 كيفية الاستخدام
+            اتبع هذه الخطوات لاستخدام النظام:
+            
+                اختر مصدر البيانات (أسهم تاسي أو رفع ملف)
+                اضبط معاملات النموذج في الإعدادات
+                قم بتحميل ومعاينة بياناتك
+                درب النموذج الذكي
+                حلل التنبؤات وقم بتصدير النتائج
+            
+            
+            ملاحظة: تنبؤات الأسهم تستند إلى الأنماط التاريخية ويجب استخدامها كأحد الأدوات العديدة في عملية قرار الاستثمار.
+        
         '''
     }
 }
@@ -1125,7 +1125,7 @@ else:
         st.markdown(f"""
         <div style='text-align: center; padding: 1.5rem;'>
             <div style='font-size: 3rem; margin-bottom: 1rem;'>🏢</div>
-            <h4>{t['select_stock']}</h4>
+            {t['select_stock']}
             <p style='color: #b0b0b0;'>{t['select_stock_desc']}</p>
         </div>
         """, unsafe_allow_html=True)
@@ -1134,7 +1134,7 @@ else:
         st.markdown(f"""
         <div style='text-align: center; padding: 1.5rem;'>
             <div style='font-size: 3rem; margin-bottom: 1rem;'>🤖</div>
-            <h4>{t['ai_training']}</h4>
+            {t['ai_training']}
             <p style='color: #b0b0b0;'>{t['ai_training_desc']}</p>
         </div>
         """, unsafe_allow_html=True)
@@ -1143,7 +1143,7 @@ else:
         st.markdown(f"""
         <div style='text-align: center; padding: 1.5rem;'>
             <div style='font-size: 3rem; margin-bottom: 1rem;'>🔮</div>
-            <h4>{t['get_predictions']}</h4>
+            {t['get_predictions']}
             <p style='color: #b0b0b0;'>{t['get_predictions_desc']}</p>
         </div>
         """, unsafe_allow_html=True)
