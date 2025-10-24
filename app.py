@@ -610,7 +610,7 @@ if data_source == t["tasi_search"]:
                     st.success(f"✅ Loaded {len(df)} days of historical data for {selected_stock}")
                     st.session_state.df = df
                 
-                st.error("❌ No historical data found for this stock")
+                
                 
             except Exception as e:
                 st.error(f"❌ Error loading data: {str(e)}")
