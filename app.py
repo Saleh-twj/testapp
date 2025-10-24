@@ -676,7 +676,9 @@ if df is not None and 'Close' in df.columns:
         try:
             # Clean the Close column (most important for predictions)
             if 'Close' in df.columns:
+                # Convert to numeric and handle errors
                 df['Close'] = pd.to_numeric(df['Close'], errors='coerce')
+                # Remove rows where Close is NaN after conversion
                 df = df.dropna(subset=['Close'])
                 st.success("✅ Cleaned Close column")
             
@@ -689,12 +691,13 @@ if df is not None and 'Close' in df.columns:
             
             st.success("✅ Data cleaning completed successfully!")
             
-            # Show data info
+            # Show data info - FIXED: Use proper string formatting
             st.write(f"📊 Cleaned data shape: {df.shape}")
-            st.write(f"🔢 Available numeric columns: {[col for col in df.columns if pd.api.types.is_numeric_dtype(df[col])]}")
+            numeric_cols = [col for col in df.columns if pd.api.types.is_numeric_dtype(df[col])]
+            st.write(f"🔢 Available numeric columns: {numeric_cols}")
             
         except Exception as e:
-            st.error(f"❌ Error during data cleaning: {e}")
+            st.error(f"❌ Error during data cleaning: {str(e)}")
             st.info("⚠️ Continuing with original data...")
         
         return df
@@ -715,19 +718,22 @@ if df is not None and 'Close' in df.columns:
             
             with col_norm2:
                 st.markdown("**📈 Data Statistics**")
-                # Show Close price range
+                # Show Close price range - FIXED: Use proper string formatting
                 if 'Close' in df.columns:
+                    close_min = float(df['Close'].min())
+                    close_max = float(df['Close'].max())
                     st.metric(
                         "Close Price Range", 
-                        f"${df['Close'].min():.2f} - ${df['Close'].max():.2f}"
+                        f"${close_min:.2f} - ${close_max:.2f}"
                     )
                 
                 # Show other columns info
                 if 'Volume' in df.columns:
-                    st.metric("Avg Volume", f"{df['Volume'].mean():.0f}")
+                    volume_mean = float(df['Volume'].mean())
+                    st.metric("Avg Volume", f"{volume_mean:.0f}")
                 
         except Exception as e:
-            st.error(f"❌ Data processing failed: {e}")
+            st.error(f"❌ Data processing failed: {str(e)}")
             st.info("⚠️ Continuing with original data...")
 
     # ------------------------------
