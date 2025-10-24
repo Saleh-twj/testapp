@@ -13,6 +13,10 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, LSTM, Dropout
 from tensorflow.keras.callbacks import EarlyStopping
 
+# Language selection
+if 'language' not in st.session_state:
+    st.session_state.language = 'English'
+
 # Optional page config
 st.set_page_config(page_title="Stock Prediction Center", layout="wide")
 
@@ -220,59 +224,316 @@ st.markdown(
         font-weight: 800;
         margin-bottom: 6px;
     }
+    
+    /* Learn more section styling */
+    .learn-more-content {
+        background: rgba(15, 23, 42, 0.9);
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 15px;
+        border-left: 4px solid #667eea;
+    }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-# ------------------------------
-# 🚀 Enhanced Header with Status (modified: smaller header text)
-# ------------------------------
-col_header1, col_header2, col_header3 = st.columns([3, 1, 1])
+# Language texts
+texts = {
+    'English': {
+        'title': '📈 Stock Prediction Center',
+        'status': 'Status',
+        'ready': 'Ready',
+        'online': 'Online',
+        'last_update': 'Last Update',
+        'config_title': '⚙️ Model Configuration',
+        'data_params': '📊 Data Parameters',
+        'time_window': 'Time Window (days)',
+        'time_window_help': 'Number of days to look back for prediction',
+        'test_ratio': 'Test Ratio',
+        'test_ratio_help': 'Proportion of data for testing',
+        'model_arch': '🤖 Model Architecture',
+        'model_type': 'Model Type',
+        'model_help': 'Choose neural network architecture',
+        'layers': 'Hidden Layers',
+        'layers_help': 'Number of hidden layers',
+        'training_params': '🔧 Training Parameters',
+        'epochs': 'Training Epochs',
+        'epochs_help': 'Number of training iterations',
+        'batch_size': 'Batch Size',
+        'batch_help': 'Training batch size',
+        'prediction_settings': '📈 Prediction Settings',
+        'forecast_days': 'Forecast Days',
+        'forecast_help': 'Days to forecast into future',
+        'confidence': 'Confidence Level',
+        'confidence_help': 'Prediction confidence interval',
+        'data_management': '📁 Data Management',
+        'data_source': 'Select Data Source:',
+        'upload_file': '📤 Upload File',
+        'tasi_search': '🏢 TASI Stock Search',
+        'select_tasi': '🔍 Select TASI Company',
+        'tasi_help': 'Choose a company from TASI to load historical stock data',
+        'historical_period': '📅 Historical Period',
+        'load_data': '📥 Load Stock Data',
+        'upload_market': 'Upload Market Data',
+        'upload_help': 'Upload CSV or Excel file with OHLC data',
+        'sample_data': 'Sample Data',
+        'generate_sample': '🎲 Generate Sample Data',
+        'download_sample': '📥 Download Sample',
+        'data_preview': '🔍 Data Preview',
+        'data_summary': '📋 Data Summary',
+        'total_records': 'Total Records',
+        'date_range': 'Date Range',
+        'total_return': 'Total Return',
+        'preprocessing': '🔄 Data Preprocessing',
+        'model_training': '🤖 AI Model Training',
+        'performance': '📊 Model Performance',
+        'analytics': '📈 Advanced Analytics',
+        'price_prediction': '📊 Price Prediction',
+        'market_analysis': '🕯️ Market Analysis',
+        'loss_metrics': '📉 Loss Metrics',
+        'future_forecast': '🔮 Future Forecast',
+        'export': '💾 Export Results',
+        'download_predictions': '📥 Download Predictions',
+        'model_arch_download': '📋 Model Architecture',
+        'training_report': '📄 Training Report',
+        'welcome_title': '🚀 Welcome to AI Stock Predictor',
+        'welcome_text': 'Choose a data source above to get started with AI-powered stock predictions. Load TASI stock data automatically or upload your own historical market data.',
+        'how_it_works': '📊 How it works:',
+        'select_stock': 'Select Stock',
+        'select_stock_desc': 'Choose from TASI companies or upload your data',
+        'ai_training': 'AI Training',
+        'ai_training_desc': 'Neural networks learn market patterns',
+        'get_predictions': 'Get Predictions',
+        'get_predictions_desc': 'Receive accurate price forecasts',
+        'footer': '© 2024 Stock Prediction Center | Built with Streamlit & TensorFlow',
+        'learn_more': '📚 Learn More',
+        'learn_more_title': '📚 How This Stock Prediction System Works',
+        'learn_more_content': '''
+        <div class="learn-more-content">
+            <h3>🔍 How the System Works</h3>
+            
+            <h4>📊 Data Processing</h4>
+            <p>The system processes historical stock data through several steps:</p>
+            <ul>
+                <li><strong>Data Collection:</strong> Fetches real-time TASI stock data or accepts uploaded files</li>
+                <li><strong>Data Cleaning:</strong> Handles missing values, converts formats, and normalizes data</li>
+                <li><strong>Normalization:</strong> Scales all values between 0-1 using MinMaxScaler for better model performance</li>
+            </ul>
+            
+            <h4>🤖 AI Model Architecture</h4>
+            <p>Three different neural network models are available:</p>
+            <ul>
+                <li><strong>LSTM:</strong> Long Short-Term Memory networks ideal for time series data</li>
+                <li><strong>MLP:</strong> Multi-Layer Perceptron for simpler patterns</li>
+                <li><strong>Hybrid:</strong> Combines LSTM and dense layers for complex patterns</li>
+            </ul>
+            
+            <h4>🎯 Training Process</h4>
+            <ul>
+                <li>Data is split into training (80%) and testing (20%) sets</li>
+                <li>Model learns from historical price patterns</li>
+                <li>Early stopping prevents overfitting</li>
+                <li>Multiple epochs refine prediction accuracy</li>
+            </ul>
+            
+            <h4>📈 Prediction & Analysis</h4>
+            <ul>
+                <li>Generates future price forecasts</li>
+                <li>Provides confidence intervals</li>
+                <li>Visualizes predictions vs actual prices</li>
+                <li>Calculates performance metrics (RMSE, R², MAPE)</li>
+            </ul>
+            
+            <h4>💡 How to Use</h4>
+            <ol>
+                <li>Select your data source (TASI stocks or file upload)</li>
+                <li>Configure model parameters in the settings</li>
+                <li>Load and preview your data</li>
+                <li>Train the AI model</li>
+                <li>Analyze predictions and export results</li>
+            </ol>
+            
+            <p><strong>Note:</strong> Stock predictions are based on historical patterns and should be used as one of many tools in your investment decision process.</p>
+        </div>
+        '''
+    },
+    'Arabic': {
+        'title': '📈 مركز توقع الأسهم',
+        'status': 'الحالة',
+        'ready': 'جاهز',
+        'online': 'متصل',
+        'last_update': 'آخر تحديث',
+        'config_title': '⚙️ إعدادات النموذج',
+        'data_params': '📊 معاملات البيانات',
+        'time_window': 'نافذة الوقت (أيام)',
+        'time_window_help': 'عدد الأيام للنظر إليها للتنبؤ',
+        'test_ratio': 'نسبة الاختبار',
+        'test_ratio_help': 'نسبة البيانات المستخدمة للاختبار',
+        'model_arch': '🤖 بنية النموذج',
+        'model_type': 'نوع النموذج',
+        'model_help': 'اختر بنية الشبكة العصبية',
+        'layers': 'الطبقات المخفية',
+        'layers_help': 'عدد الطبقات المخفية',
+        'training_params': '🔧 معاملات التدريب',
+        'epochs': 'دورات التدريب',
+        'epochs_help': 'عدد دورات التدريب',
+        'batch_size': 'حجم الدفعة',
+        'batch_help': 'حجم الدفعة للتدريب',
+        'prediction_settings': '📈 إعدادات التنبؤ',
+        'forecast_days': 'أيام التنبؤ',
+        'forecast_help': 'عدد الأيام للتنبؤ بالمستقبل',
+        'confidence': 'مستوى الثقة',
+        'confidence_help': 'فترة ثقة التنبؤ',
+        'data_management': '📁 إدارة البيانات',
+        'data_source': 'اختر مصدر البيانات:',
+        'upload_file': '📤 رفع ملف',
+        'tasi_search': '🏢 بحث أسهم تاسي',
+        'select_tasi': '🔍 اختر شركة تاسي',
+        'tasi_help': 'اختر شركة من تاسي لتحميل البيانات التاريخية',
+        'historical_period': '📅 الفترة التاريخية',
+        'load_data': '📥 تحميل بيانات الأسهم',
+        'upload_market': 'رفع بيانات السوق',
+        'upload_help': 'رفع ملف CSV أو Excel يحتوي على بيانات OHLC',
+        'sample_data': 'بيانات نموذجية',
+        'generate_sample': '🎲 إنشاء بيانات نموذجية',
+        'download_sample': '📥 تحميل النموذج',
+        'data_preview': '🔍 معاينة البيانات',
+        'data_summary': '📋 ملخص البيانات',
+        'total_records': 'إجمالي السجلات',
+        'date_range': 'النطاق الزمني',
+        'total_return': 'إجمالي العائد',
+        'preprocessing': '🔄 معالجة البيانات',
+        'model_training': '🤖 تدريب النموذج الذكي',
+        'performance': '📊 أداء النموذج',
+        'analytics': '📈 التحليلات المتقدمة',
+        'price_prediction': '📊 تنبؤ الأسعار',
+        'market_analysis': '🕯️ تحليل السوق',
+        'loss_metrics': '📉 مقاييس الخسارة',
+        'future_forecast': '🔮 التنبؤ المستقبلي',
+        'export': '💾 تصدير النتائج',
+        'download_predictions': '📥 تحميل التنبؤات',
+        'model_arch_download': '📋 بنية النموذج',
+        'training_report': '📄 تقرير التدريب',
+        'welcome_title': '🚀 مرحباً بكم في منصة توقع الأسهم الذكية',
+        'welcome_text': 'اختر مصدر البيانات أعلاه للبدء في التنبؤ بالأسهم باستخدام الذكاء الاصطناعي. قم بتحميل بيانات أسهم تاسي تلقائياً أو ارفع بيانات السوق التاريخية الخاصة بك.',
+        'how_it_works': '📊 كيف يعمل:',
+        'select_stock': 'اختيار السهم',
+        'select_stock_desc': 'اختر من شركات تاسي أو ارفع بياناتك',
+        'ai_training': 'التدريب الذكي',
+        'ai_training_desc': 'الشبكات العصبية تتعلم أنماط السوق',
+        'get_predictions': 'الحصول على تنبؤات',
+        'get_predictions_desc': 'احصل على تنبؤات دقيقة للأسعار',
+        'footer': '© 2024 مركز توقع الأسهم | مبنى باستخدام Streamlit & TensorFlow',
+        'learn_more': '📚 اعرف المزيد',
+        'learn_more_title': '📚 كيف يعمل نظام توقع الأسهم هذا',
+        'learn_more_content': '''
+        <div class="learn-more-content" style="text-align: right; direction: rtl;">
+            <h3>🔍 كيف يعمل النظام</h3>
+            
+            <h4>📊 معالجة البيانات</h4>
+            <p>يقوم النظام بمعالجة بيانات الأسهم التاريخية من خلال عدة خطوات:</p>
+            <ul>
+                <li><strong>جمع البيانات:</strong> يجلب بيانات أسهم تاسي في الوقت الحقيقي أو يقبل الملفات المرفوعة</li>
+                <li><strong>تنظيف البيانات:</strong> يتعامل مع القيم المفقودة، يحول التنسيقات، ويطبع البيانات</li>
+                <li><strong>التطبيع:</strong> يقيس جميع القيم بين 0-1 باستخدام MinMaxScaler لأداء أفضل للنموذج</li>
+            </ul>
+            
+            <h4>🤖 بنية النموذج الذكي</h4>
+            <p>ثلاثة نماذج مختلفة للشبكات العصبية متاحة:</p>
+            <ul>
+                <li><strong>LSTM:</strong> شبكات الذاكرة طويلة المدى المثالية لبيانات السلاسل الزمنية</li>
+                <li><strong>MLP:</strong>多层感知器 للأنماط البسيطة</li>
+                <li><strong>Hybrid:</strong> يجمع بين طبقات LSTM والطبقات الكثيفة للأنماط المعقدة</li>
+            </ul>
+            
+            <h4>🎯 عملية التدريب</h4>
+            <ul>
+                <li>يتم تقسيم البيانات إلى مجموعات تدريب (80٪) واختبار (20٪)</li>
+                <li>يتعلم النموذج من أنماط الأسعار التاريخية</li>
+                <li>التوقف المبكر يمنع الإفراط في التجهيز</li>
+                <li>دورات متعددة تحسن دقة التنبؤ</li>
+            </ul>
+            
+            <h4>📈 التنبؤ والتحليل</h4>
+            <ul>
+                <li>يولد تنبؤات الأسعار المستقبلية</li>
+                <li>يوفر فترات ثقة</li>
+                <li>يصور التنبؤات مقابل الأسعار الفعلية</li>
+                <li>يحسب مقاييس الأداء (RMSE, R², MAPE)</li>
+            </ul>
+            
+            <h4>💡 كيفية الاستخدام</h4>
+            <ol>
+                <li>اختر مصدر البيانات (أسهم تاسي أو رفع ملف)</li>
+                <li>اضبط معاملات النموذج في الإعدادات</li>
+                <li>قم بتحميل ومعاينة بياناتك</li>
+                <li>درب النموذج الذكي</li>
+                <li>حلل التنبؤات وقم بتصدير النتائج</li>
+            </ol>
+            
+            <p><strong>ملاحظة:</strong> تنبؤات الأسهم تستند إلى الأنماط التاريخية ويجب استخدامها كأحد الأدوات العديدة في عملية قرار الاستثمار.</p>
+        </div>
+        '''
+    }
+}
+
+# Language selector
+col_lang, col_header1, col_header2, col_header3 = st.columns([1, 3, 1, 1])
+with col_lang:
+    lang = st.selectbox("🌐 Language / اللغة", ["English", "Arabic"], key="lang_selector")
+    st.session_state.language = lang
+
+current_lang = st.session_state.language
+t = texts[current_lang]
+
 with col_header1:
-    # Smaller gradient text header instead of big boxed header
-    st.markdown('<div class="inline-gradient-title">📈 Stock Prediction Center</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="inline-gradient-title">{t["title"]}</div>', unsafe_allow_html=True)
 
 with col_header2:
-    st.metric("Status", "Ready", delta="Online")
+    st.metric(t["status"], t["ready"], delta=t["online"])
 
 with col_header3:
-    st.metric("Last Update", datetime.now().strftime("%H:%M"))
+    st.metric(t["last_update"], datetime.now().strftime("%H:%M"))
+
+# Learn More Section
+with st.expander(t["learn_more"], expanded=False):
+    st.markdown(t["learn_more_content"], unsafe_allow_html=True)
 
 # ------------------------------
 # 🎯 Configuration Panel (moved into collapsible expander)
 # ------------------------------
 # Use an expander collapsed by default so user can click arrow to reveal settings
-with st.expander("⚙️ Model Configuration", expanded=False):
+with st.expander(t["config_title"], expanded=False):
     # optional section header inside expander to keep visual style
-    st.markdown('<div class="section-header">⚙️ Model Configuration</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="section-header">{t["config_title"]}</div>', unsafe_allow_html=True)
 
     config_col1, config_col2, config_col3, config_col4 = st.columns(4)
 
     with config_col1:
-        st.markdown("**📊 Data Parameters**")
-        time_window = st.slider("Time Window (days)", 5, 100, 60, help="Number of days to look back for prediction")
-        test_ratio = st.slider("Test Ratio", 0.1, 0.5, 0.2, help="Proportion of data for testing")
+        st.markdown(f"**{t['data_params']}**")
+        time_window = st.slider(t["time_window"], 5, 100, 60, help=t["time_window_help"])
+        test_ratio = st.slider(t["test_ratio"], 0.1, 0.5, 0.2, help=t["test_ratio_help"])
 
     with config_col2:
-        st.markdown("**🤖 Model Architecture**")
-        model_choice = st.selectbox("Model Type", ["LSTM", "MLP", "Hybrid"], help="Choose neural network architecture")
-        layers = st.slider("Hidden Layers", 1, 5, 3, help="Number of hidden layers")
+        st.markdown(f"**{t['model_arch']}**")
+        model_choice = st.selectbox(t["model_type"], ["LSTM", "MLP", "Hybrid"], help=t["model_help"])
+        layers = st.slider(t["layers"], 1, 5, 3, help=t["layers_help"])
 
     with config_col3:
-        st.markdown("**🔧 Training Parameters**")
-        epochs = st.slider("Training Epochs", 10, 500, 100, help="Number of training iterations")
-        batch_size = st.selectbox("Batch Size", [16, 32, 64, 128], index=1, help="Training batch size")
+        st.markdown(f"**{t['training_params']}**")
+        epochs = st.slider(t["epochs"], 10, 500, 100, help=t["epochs_help"])
+        batch_size = st.selectbox(t["batch_size"], [16, 32, 64, 128], index=1, help=t["batch_help"])
 
     with config_col4:
-        st.markdown("**📈 Prediction Settings**")
-        forecast_days = st.slider("Forecast Days", 1, 30, 7, help="Days to forecast into future")
-        confidence_level = st.slider("Confidence Level", 0.8, 0.99, 0.95, help="Prediction confidence interval")
+        st.markdown(f"**{t['prediction_settings']}**")
+        forecast_days = st.slider(t["forecast_days"], 1, 30, 7, help=t["forecast_help"])
+        confidence_level = st.slider(t["confidence"], 0.8, 0.99, 0.95, help=t["confidence_help"])
 
 # ------------------------------
 # 🏢 TASI Stock Search & Data Management
 # ------------------------------
-st.markdown('<div class="section-header">📁 Data Management</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="section-header">{t["data_management"]}</div>', unsafe_allow_html=True)
 
 # TASI companies for historical data
 tasi_stocks = {
@@ -296,33 +557,33 @@ tasi_stocks = {
 
 # Data source selection
 data_source = st.radio(
-    "**Select Data Source:**",
-    ["📤 Upload File", "🏢 TASI Stock Search"],
+    f"**{t['data_source']}**",
+    [t["upload_file"], t["tasi_search"]],
     horizontal=True
 )
 
 df = None
 
-if data_source == "🏢 TASI Stock Search":
+if data_source == t["tasi_search"]:
     col_search1, col_search2, col_search3 = st.columns([2, 1, 1])
     
     with col_search1:
         selected_stock = st.selectbox(
-            "🔍 Select TASI Company", 
+            t["select_tasi"], 
             options=list(tasi_stocks.keys()),
-            help="Choose a company from TASI to load historical stock data"
+            help=t["tasi_help"]
         )
     
     with col_search2:
         period = st.selectbox(
-            "📅 Historical Period",
+            t["historical_period"],
             ["3mo", "6mo", "1y", "2y", "5y"],
             index=2
         )
     
     with col_search3:
         st.markdown("###")  # Vertical spacing
-        load_data = st.button("📥 Load Stock Data", use_container_width=True)
+        load_data = st.button(t["load_data"], use_container_width=True)
     
     if load_data:
         with st.spinner(f"📊 Loading historical data for {selected_stock}..."):
@@ -348,12 +609,12 @@ else:  # File Upload
     upload_col1, upload_col2 = st.columns([2, 1])
 
     with upload_col1:
-        uploaded_file = st.file_uploader("**Upload Market Data**", type=["csv", "xlsx"], 
-                                       help="Upload CSV or Excel file with OHLC data")
+        uploaded_file = st.file_uploader(f"**{t['upload_market']}**", type=["csv", "xlsx"], 
+                                       help=t["upload_help"])
 
     with upload_col2:
-        st.markdown("**Sample Data**")
-        if st.button("🎲 Generate Sample Data", use_container_width=True):
+        st.markdown(f"**{t['sample_data']}**")
+        if st.button(t["generate_sample"], use_container_width=True):
             # Generate sample data
             dates = pd.date_range(start='2020-01-01', end=datetime.now(), freq='D')
             sample_data = pd.DataFrame({
@@ -365,7 +626,7 @@ else:  # File Upload
             })
             sample_data['Close'] = sample_data['Close'].abs()  # Ensure positive prices
             csv = sample_data.to_csv(index=False)
-            st.download_button("📥 Download Sample", data=csv, file_name="sample_stock_data.csv", mime="text/csv")
+            st.download_button(t["download_sample"], data=csv, file_name="sample_stock_data.csv", mime="text/csv")
 
     if uploaded_file is not None:
         if uploaded_file.name.endswith("xlsx"):
@@ -382,27 +643,27 @@ if df is not None and 'Close' in df.columns:
     
     preview_col1, preview_col2 = st.columns([3, 1])
     with preview_col1:
-        st.markdown("**🔍 Data Preview**")
+        st.markdown(f"**{t['data_preview']}**")
         st.dataframe(df.head(10), use_container_width=True)
     
     with preview_col2:
-        st.markdown("**📋 Data Summary**")
-        st.metric("Total Records", len(df))
+        st.markdown(f"**{t['data_summary']}**")
+        st.metric(t["total_records"], len(df))
         if 'Date' in df.columns:
             date_range = f"{df['Date'].min()} to {df['Date'].max()}"
         else:
             date_range = f"Index {df.index.min()} to {df.index.max()}"
-        st.metric("Date Range", date_range)
+        st.metric(t["date_range"], date_range)
         try:
             price_change = float(((df['Close'].iloc[-1] - df['Close'].iloc[0]) / df['Close'].iloc[0]) * 100)
-            st.metric("Total Return", f"{price_change:.2f}%")
+            st.metric(t["total_return"], f"{price_change:.2f}%")
         except:
-            st.metric("Total Return", "N/A")
+            st.metric(t["total_return"], "N/A")
 
     # ------------------------------
     # 🔄 DATA NORMALIZATION - FIXED VERSION
     # ------------------------------
-    st.markdown('<div class="section-header">🔄 Data Preprocessing</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="section-header">{t["preprocessing"]}</div>', unsafe_allow_html=True)
     
     def normalize_stock_data(df):
         """
@@ -570,7 +831,7 @@ if df is not None and 'Close' in df.columns:
     # ------------------------------
     # 🤖 Model Training Section
     # ------------------------------
-    st.markdown('<div class="section-header">🤖 AI Model Training</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="section-header">{t["model_training"]}</div>', unsafe_allow_html=True)
     
     with st.spinner("🚀 Training AI model... This may take a few moments"):
         # Preprocessing
@@ -647,7 +908,7 @@ if df is not None and 'Close' in df.columns:
     # ------------------------------
     # 🎯 Performance Metrics
     # ------------------------------
-    st.markdown('<div class="section-header">📊 Model Performance</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="section-header">{t["performance"]}</div>', unsafe_allow_html=True)
     
     # Performance badges
     def get_performance_badge(metric, value):
@@ -707,9 +968,9 @@ if df is not None and 'Close' in df.columns:
     # ------------------------------
     # 📈 Enhanced Visualization Tabs
     # ------------------------------
-    st.markdown('<div class="section-header">📈 Advanced Analytics</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="section-header">{t["analytics"]}</div>', unsafe_allow_html=True)
     
-    tabs = st.tabs(["📊 Price Prediction", "🕯️ Market Analysis", "📉 Loss Metrics", "🔮 Future Forecast"])
+    tabs = st.tabs([t["price_prediction"], t["market_analysis"], t["loss_metrics"], t["future_forecast"]])
 
     with tabs[0]:
         col_chart1, col_chart2 = st.columns([3, 1])
@@ -868,7 +1129,7 @@ if df is not None and 'Close' in df.columns:
     # ------------------------------
     # 💾 Export Results
     # ------------------------------
-    st.markdown('<div class="section-header">💾 Export Results</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="section-header">{t["export"]}</div>', unsafe_allow_html=True)
     
     pred_df = pd.DataFrame({
         "Actual_Price": y_test_inv.flatten(),
@@ -882,7 +1143,7 @@ if df is not None and 'Close' in df.columns:
     with col_export1:
         csv = pred_df.to_csv(index=False)
         st.download_button(
-            "📥 Download Predictions", 
+            t["download_predictions"], 
             data=csv, 
             file_name="stock_predictions.csv", 
             mime="text/csv",
@@ -895,7 +1156,7 @@ if df is not None and 'Close' in df.columns:
         model.summary(print_fn=lambda x: model_summary.append(x))
         model_summary_text = "\n".join(model_summary)
         st.download_button(
-            "📋 Model Architecture", 
+            t["model_arch_download"], 
             data=model_summary_text, 
             file_name="model_architecture.txt", 
             mime="text/plain",
@@ -920,11 +1181,11 @@ if df is not None and 'Close' in df.columns:
         - R² Score: {r2:.4f}
         - MAPE: {mape:.2f}%
         
-        Dataset: {uploaded_file.name if data_source == '📤 Upload File' else selected_stock}
+        Dataset: {uploaded_file.name if data_source == t['upload_file'] else selected_stock}
         Records: {len(df)}
         """
         st.download_button(
-            "📄 Training Report", 
+            t["training_report"], 
             data=report, 
             file_name="training_report.txt", 
             mime="text/plain",
@@ -933,44 +1194,43 @@ if df is not None and 'Close' in df.columns:
 
 else:
     # Welcome state with sample visualization
-    st.markdown("""
+    st.markdown(f"""
     <div style='text-align: center; padding: 4rem 2rem; background: rgba(255,255,255,0.05); border-radius: 20px; margin: 2rem 0;'>
-        <h2 style='color: #667eea; margin-bottom: 1rem;'>🚀 Welcome to AI Stock Predictor</h2>
+        <h2 style='color: #667eea; margin-bottom: 1rem;'>{t['welcome_title']}</h2>
         <p style='color: #b0b0b0; font-size: 1.2rem; max-width: 600px; margin: 0 auto;'>
-            Choose a data source above to get started with AI-powered stock predictions.
-            Load TASI stock data automatically or upload your own historical market data.
+            {t['welcome_text']}
         </p>
     </div>
     """, unsafe_allow_html=True)
     
     # Sample visualization
-    st.markdown("### 📊 How it works:")
+    st.markdown(f"### {t['how_it_works']}")
     col_demo1, col_demo2, col_demo3 = st.columns(3)
     
     with col_demo1:
-        st.markdown("""
+        st.markdown(f"""
         <div style='text-align: center; padding: 1.5rem;'>
             <div style='font-size: 3rem; margin-bottom: 1rem;'>🏢</div>
-            <h4>Select Stock</h4>
-            <p style='color: #b0b0b0;'>Choose from TASI companies or upload your data</p>
+            <h4>{t['select_stock']}</h4>
+            <p style='color: #b0b0b0;'>{t['select_stock_desc']}</p>
         </div>
         """, unsafe_allow_html=True)
     
     with col_demo2:
-        st.markdown("""
+        st.markdown(f"""
         <div style='text-align: center; padding: 1.5rem;'>
             <div style='font-size: 3rem; margin-bottom: 1rem;'>🤖</div>
-            <h4>AI Training</h4>
-            <p style='color: #b0b0b0;'>Neural networks learn market patterns</p>
+            <h4>{t['ai_training']}</h4>
+            <p style='color: #b0b0b0;'>{t['ai_training_desc']}</p>
         </div>
         """, unsafe_allow_html=True)
     
     with col_demo3:
-        st.markdown("""
+        st.markdown(f"""
         <div style='text-align: center; padding: 1.5rem;'>
             <div style='font-size: 3rem; margin-bottom: 1rem;'>🔮</div>
-            <h4>Get Predictions</h4>
-            <p style='color: #b0b0b0;'>Receive accurate price forecasts</p>
+            <h4>{t['get_predictions']}</h4>
+            <p style='color: #b0b0b0;'>{t['get_predictions_desc']}</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -981,8 +1241,6 @@ st.markdown("---")
 footer_col1, footer_col2, footer_col3 = st.columns([2, 1, 1])
 with footer_col1:
     st.markdown(
-        "<div style='text-align: center; color: #666; font-size: 0.9rem;'>"
-        "© 2024 Stock Prediction Center | Built with Streamlit & TensorFlow"
-        "</div>", 
+        f"<div style='text-align: center; color: #666; font-size: 0.9rem;'>{t['footer']}</div>", 
         unsafe_allow_html=True
     )
